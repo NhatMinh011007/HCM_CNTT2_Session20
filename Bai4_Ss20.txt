@@ -1,0 +1,5 @@
+Khả năng chống Infostealer: Chrome rất dễ bị malware đánh cắp tệp Login Data và giải mã lộ mật khẩu dạng plaintext. Bitwarden lưu dữ liệu đã mã hóa AES-256, malware không thể đọc được nếu không có Master Password.
+
+Zero-Knowledge Architecture: Chrome không có (Google có thể tiếp cận dữ liệu). Bitwarden tuyệt đối bảo mật, máy chủ không bao giờ biết Master Password hay dữ liệu của người dùng.
+
+Đồng bộ chéo: Chrome mượt mà trong hệ sinh thái Google. Bitwarden xuất sắc trên mọi thiết bị và nền tảng (Trình duyệt, App di động, Desktop).

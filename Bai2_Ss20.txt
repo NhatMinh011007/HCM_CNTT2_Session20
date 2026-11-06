@@ -1,0 +1,23 @@
+1. Cơ chế Domino Effect (Credential Stuffing)
+Rò rỉ từ nguồn yếu: Các diễn đàn công nghệ nhỏ thường có hệ thống bảo mật lỏng lẻo, dễ bị hacker tấn công chiếm cơ sở dữ liệu. Nếu dữ liệu không được mã hóa tốt (hoặc lưu dạng văn bản thuần túy - plaintext), hacker sẽ lấy được toàn bộ danh sách email và mật khẩu.
+
+Tấn công tự động hàng loạt: Kẻ gian sử dụng các công cụ tự động (botnet) để thử ngay cặp thông tin đăng nhập đó (123456) lên hàng loạt dịch vụ lớn như Gmail, Facebook, GitHub (thủ thuật gọi là Credential Stuffing).
+
+Hiệu ứng domino: Do bạn dùng chung một mật khẩu cho mọi nơi, chỉ cần một diễn đàn nhỏ bị lộ, toàn bộ các tài khoản quan trọng còn lại sẽ sụp đổ theo hệ thống.
+
+2. Vì sao mật khẩu cảm tính dễ bị bẻ khóa?
+Tư duy con người có quy luật: Mật khẩu do con người tự đặt (123456, qwerty, ngày sinh) thường ngắn, lặp lại hoặc có ý nghĩa quen thuộc. Kẻ tấn công luôn sử dụng Dictionary Attack (Tấn công từ điển) hoặc Brute Force dựa trên danh sách hàng triệu mật khẩu phổ biến nhất, cho phép quét và khớp đúng mật khẩu dạng này chỉ trong vài mili-giây.
+
+Mật khẩu do máy sinh ra: Sử dụng chuỗi ngẫu nhiên bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt với độ dài lớn. Điều này tạo ra độ hỗn loạn (entropy) cực cao, khiến các thuật toán dò tìm phải mất hàng triệu năm tính toán mới có xác suất thành công.
+
+3. Ưu thế bảo mật của AES-256 trong Password Manager so với ghi chép thủ công
+Rủi ro của ghi chép thủ công: Viết vào sổ tay, lưu trong file Notepad hay ghi chú điện thoại hoàn toàn không có mã hóa. Bất kỳ ai cầm được điện thoại, máy tính hoặc thấy cuốn sổ của bạn đều có thể đọc được toàn bộ danh sách mật khẩu ngay lập tức.
+
+Sức mạnh của chuẩn AES-256 trong Password Manager:
+
+Các trình quản lý mật khẩu uy tín (như Bitwarden) sử dụng thuật toán mã hóa đối xứng AES-256 (Advanced Encryption Standard với khóa 256-bit) — tiêu chuẩn bảo mật được chính phủ Mỹ và các cơ quan tài chính toàn cầu tin dùng.
+
+Với không gian khóa 
+2 
+256
+  trạng thái, việc dùng siêu máy tính mạnh nhất hiện nay để vét cạn (brute-force) mã hóa AES-256 sẽ cần thời gian dài hơn cả tuổi vũ trụ. Dữ liệu của bạn được mã hóa cục bộ ngay trên thiết bị trước khi gửi lên đám mây, đảm bảo ngay cả nhà cung cấp dịch vụ hay hacker thâm nhập máy chủ cũng không thể đọc được nội dung nếu không có Master Password của riêng bạn.

@@ -1,0 +1,18 @@
+1. Báo cáo đánh giá rủi ro (Thiếu .gitignore)
+Lộ thông tin nhạy cảm: Các tệp chứa chuỗi kết nối Database, AWS Credentials, hay API Keys (Stripe, VNPay) sẽ bị các con bot tự động quét thấy trên GitHub Public chỉ trong vài phút.
+
+Hậu quả trực tiếp: Kẻ gian có thể chiếm quyền điều khiển hạ tầng đám mây, hút sạch tiền trong tài khoản thanh toán, hoặc làm rò rỉ dữ liệu cá nhân của khách hàng, gây tổn hại nghiêm trọng về tài chính và uy tín doanh nghiệp.
+
+2. Pre-push Checklist (Chống rò rỉ mã nguồn)
+Quét mã tự động: Sử dụng công cụ Gitleaks (gitleaks detect --source .) để kiểm tra toàn bộ mã nguồn và lịch sử Git xem có vô tình để lại API Key hay không.
+
+Chặn tại client: Cấu hình Husky Git Hook tại tệp .husky/pre-push để hệ thống tự động chạy lệnh quét mỗi khi có lệnh git push. Nếu phát hiện key, lệnh push sẽ bị từ chối ngay lập tức.
+
+3. Cấu trúc tệp .env.example chuẩn
+Tạo một tệp mẫu chứa tên các biến môi trường kèm giá trị giả định (Dummy data) cho các môi trường (Dev, Test, Prod) như cổng kết nối Database, chuỗi cấu hình JWT, và các khóa thanh toán ở chế độ Sandbox/Test.
+
+Giúp đối tác biết cần điền những thông số gì mà không làm lộ thông tin thật của hệ thống.
+
+4. Bắt buộc 2FA cho toàn bộ Team
+ Thiết lập trên GitHub: Truy cập vào Organization Settings -> Security -> Authentication security -> Chọn "Require two-factor authentication for everyone".
+ Quy định này buộc mọi thành viên phải bật xác thực 2 bước mới được phép thao tác với repository, ngăn chặn việc tài khoản cá nhân bị chiếm đoạt để phá hoại mã nguồn.

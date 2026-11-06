@@ -1,0 +1,21 @@
+1. IPO Khôi phục quyền AWS khi mất thiết bị TOTP
+Input: Bộ mã dự phòng (Backup Codes) đã lưu trữ an toàn trước đó.
+
+Process:
+
+Đăng nhập AWS bằng mã dự phòng.
+
+Vào IAM Console để xóa thiết bị MFA cũ bị mất.
+
+Đăng ký thiết bị điện thoại mới và quét mã QR.
+
+Tạo lại bộ mã dự phòng mới (mã cũ tự động vô hiệu hóa).
+
+Output: Tài khoản an toàn, khôi phục quyền quản trị, loại bỏ hoàn toàn nguy cơ từ thiết bị cũ.
+
+2. Vì sao không được lưu Backup Codes dạng ảnh trong điện thoại?
+Đồng bộ đám mây tự động: Ảnh tự động đẩy lên iCloud/Google Photos, dễ bị lộ nếu tài khoản đám mây bị hack.
+
+Nguy cơ cấp quyền app: Các ứng dụng chụp ảnh/chỉnh sửa có thể quét lén thư viện ảnh để lấy cắp dữ liệu.
+
+Mất an toàn khi thất lạc máy: Kẻ gian cầm được điện thoại có thể mở thư viện ảnh và xem trực tiếp mã dự phòng để chiếm đoạt tài khoản.

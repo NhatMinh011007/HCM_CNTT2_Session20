@@ -1,0 +1,49 @@
+I. Chi tiết Kiến trúc 3 lớp bảo vệ (3-Layer Security Architecture)
+Hệ thống ví điện tử đòi hỏi tiêu chuẩn bảo mật tuyệt đối, phòng thủ theo chiều sâu (Defense-in-Depth) ngay cả khi hacker đã chiếm được cơ sở dữ liệu mật khẩu hoặc máy chủ trung gian.
+
+Lớp 1: Knowledge Factor (Xác thực danh tính ban đầu)
+
+Công nghệ: Sử dụng mật khẩu kết hợp thuật toán băm kháng GPU/ASIC hiện đại như Argon2id (hoặc PBKDF2/bcrypt với độ khó cao) kèm theo chuỗi Salt ngẫu nhiên phía client trước khi truyền tải qua kênh bảo mật TLS 1.3.
+
+Vai trò: Ngăn chặn các cuộc tấn công brute-force từ máy chủ hoặc rò rỉ cơ sở dữ liệu (Database Leak). Nếu hacker lấy được cơ sở dữ liệu này, chúng cũng không thể đảo ngược mã băm để lấy mật khẩu gốc.
+
+Lớp 2: Possession Factor (Xác thực thiết bị sở hữu - TOTP)
+
+Công nghệ: Tuân thủ chuẩn RFC 6238 (TOTP). Máy chủ và thiết bị của người dùng chia sẻ một Secret Key độc nhất được mã hóa ở mức phần cứng. Mã OTP 6 chữ số được tính toán dựa trên thời gian thực:
+      TOTP = Truncate(HMAC-SHA1(Secret Key, Counter T))
+Vai trò: Ngăn chặn hoàn toàn việc đánh cắp phiên đăng nhập (Session Hijacking) hoặc tấn công giả mạo (Phishing) trực tuyến, bởi vì mã OTP chỉ có giá trị trong vòng 30 giây và gắn liền với một thiết bị vật lý cụ thể.
+
+Lớp 3: Inherent Factor & Hardware Binding (Xác thực sinh trắc học & Khóa phần cứng)
+
+Công nghệ: Tích hợp trực tiếp với các mô-đun bảo mật phần cứng của thiết bị di động như Secure Enclave (iOS) hoặc TEE - Trusted Execution Environment (Android). Quá trình giải mã khóa riêng tư (Private Key) của ví bắt buộc phải thông qua xác thực sinh trắc học (FaceID, Vân tay) cục bộ.
+
+Vai trò: Đây là "lớp phòng thủ cuối cùng". Ngay cả khi hacker có được mật khẩu (Lớp 1) và cài đặt được ứng dụng giả mạo mã TOTP (Lớp 2), chúng vẫn hoàn toàn bất lực vì không thể vượt qua sinh trắc học vật lý và phần cứng độc lập của nạn nhân.
+
+II. Luồng dữ liệu bảo mật (Data Flow)
+
+Luồng hoạt động phối hợp giữa Client, Server và Secure Enclave:
+ Bước 1: Người dùng nhập mật khẩu -> Server xác thực lớp 1 thành công và yêu cầu mã TOTP.
+ Bước 2: Người dùng nhập mã TOTP -> Server kiểm tra tính hợp lệ của mã dựa trên đồng hồ hệ thống và Secret Key đã đăng ký.
+ Bước 3: Khi vượt qua Lớp 1 và Lớp 2, Server cấp một token phiên tạm thời. Ứng dụng yêu cầu người dùng quét sinh trắc học để kích hoạt Secure Enclave giải mã Private Key ký số giao dịch trực tiếp trên phần cứng thiết bị.
+
+III. Giải pháp xử lý Edge Case: Khi ở trên máy bay (Offline / Không có internet)
+
+Đây là thách thức lớn đối với các ứng dụng yêu cầu kết nối liên tục, nhưng lại được giải quyết triệt để nhờ bản chất toán học của các công nghệ phi tập trung:
+
+Bản chất ngoại tuyến của TOTP:
+
+Thuật toán TOTP không hề gọi API hay kết nối internet với máy chủ để sinh mã.\
+
+Ứng dụng ví (hoặc ứng dụng Authenticator tích hợp) sử dụng đồng hồ nội bộ của thiết bị di động kết hợp với Secret Key đã được lưu trữ an toàn bên trong bộ nhớ mã hóa từ trước để tự động tạo ra mã OTP 6 chữ số chính xác theo từng chu kỳ 30 giây. Người dùng chỉ cần đọc mã này trên màn hình để xác thực cục bộ.
+ 
+Cơ chế ký giao dịch ngoại tuyến (Offline Transaction Signing):
+
+Trong không gian tiền điện tử, việc xác thực giao dịch không đòi hỏi máy chủ phải "cho phép" theo thời gian thực, mà phụ thuộc hoàn toàn vào Chữ số ký (Digital Signature) tạo ra từ Private Key của người dùng.
+
+Khi không có Internet (trên máy bay), người dùng vẫn có thể:
+
+Nhập mã TOTP ngoại tuyến.
+
+Xác thực sinh trắc học để TEE giải mã Private Key và ký số trực tiếp lên dữ liệu giao dịch.
+
+Đồng bộ hóa sau chuyến bay: Giao dịch sau khi được ký ngoại tuyến sẽ chuyển thành một chuỗi byte hợp lệ và được lưu trữ tạm thời trong bộ nhớ đệm (Local Cache) của thiết bị. Ngay khi máy bay hạ cánh và thiết bị kết nối lại với Internet (Wi-Fi hoặc mạng di động), ứng dụng sẽ tự động phát sóng (Broadcast) gói giao dịch đã ký này lên mạng lưới Blockchain để xử lý mà không cần thực hiện lại các bước đăng nhập phức tạp.

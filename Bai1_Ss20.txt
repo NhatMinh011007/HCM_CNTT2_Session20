@@ -1,0 +1,37 @@
+1. Phân tích ký tự bất thường và cơ chế tấn công
+Ký tự bất thường trong URL
+Trong URL [https://githúb.com/login](https://githúb.com/login), ký tự bất thường là chữ ú (chữ u có dấu sắc, mã Unicode: U+00FA) thay vì chữ u tiêu chuẩn (ASCII).
+
+Bản chất của cuộc tấn công (IDN Homograph Attack)
+Đánh lừa thị giác: Kẻ tấn công lợi dụng các ký tự Unicode có hình dáng (glyph) gần như trùng khớp hoàn toàn với các ký tự Latinh thông thường để tạo ra các tên miền giả mạo (Typosquatting/Homograph). Khi nhìn lướt qua trên thanh địa chỉ, githúb.com trông không khác gì github.com.
+
+Cơ chế chuyển đổi (Punycode): Hệ thống DNS toàn cầu thực chất không hiểu các ký tự có dấu. Các trình duyệt hiện đại sẽ tự động dịch các tên miền chứa Unicode đặc biệt thành dạng mã hóa Punycode (có dạng tiền tố xn--). Nếu người dùng để ý kỹ cấu hình hoặc một số trình duyệt/ứng dụng cũ không tự động hiển thị dạng Punycode, URL thực tế phía sau có thể bị biến đổi hoàn toàn (ví dụ: xn--githb-9ta.com), nhưng kẻ gian đã khéo léo dùng ký tự ú để hiển thị trực quan giống thật nhất có thể.
+
+Hậu quả: Người dùng tin tưởng tuyệt đối vào giao diện "giống thật", nhập thông tin xác thực hoặc Master Password, dẫn đến việc token phiên làm việc hoặc mật khẩu bị đánh cắp ngay lập tức.
+
+2. Quy trình kiểm tra URL nhanh trước khi nhập thông tin nhạy cảm
+Khi được yêu cầu đăng nhập lại ở bất kỳ dịch vụ nào (đặc biệt là các hệ thống quản lý mã nguồn như GitHub), hãy áp dụng ngay quy trình kiểm tra kép dưới đây:
+
+Bước 1: Kiểm tra bằng mắt thường (Quick Visual Inspection)
+Rà soát ký tự tinh vi: Kiểm tra xem có dấu phụ, dấu chấm lửng, hoặc ký tự lạ (như chữ có dấu, chữ số 0 thay cho chữ o, chữ l viết thường thay cho số 1) xuất hiện trong phần tên miền chính hay không.
+
+Xác định gốc tên miền (Root Domain): Luôn tập trung nhìn vào phần tên miền đứng ngay trước dấu chấm cuối cùng trước đuôi .com (phần chính xác phải là github.com, không được có thêm các tiền tố/hậu tố lạ như github-login.com, githúb.com, hay login-github.com).
+
+Bước 2: Kiểm tra dựa vào Trình quản lý mật khẩu (Bitwarden / Auto-fill Check)
+Đây là lớp phòng thủ tự động cực kỳ hiệu quả đối với các lập trình viên sử dụng trình quản lý mật khẩu:
+
+Dấu hiệu nhận biết: Khi bạn bấm vào form đăng nhập, nếu trình quản lý mật khẩu (như Bitwarden) không tự động điền (Auto-fill) thông tin tài khoản và mật khẩu, hãy dừng lại ngay lập tức.
+
+Lý do: Các trình quản lý mật khẩu bảo mật dựa trên strict domain matching (khớp chính xác tên miền gốc). Trang web giả mạo githúb.com sở hữu domain khác hoàn toàn với github.com, do đó trình quản lý mật khẩu sẽ nhận diện đây là một trang hoàn toàn mới và từ chối điền dữ liệu.
+
+Bước 3: Kiểm tra chứng chỉ SSL/TLS (Certificate Inspection)
+Nhấn vào biểu tượng ổ khóa ở đầu thanh địa chỉ trình duyệt.
+
+Xem thông tin chi tiết về Chứng chỉ (Certificate) của trang web:
+
+Kiểm tra mục Issued to (Cấp cho) hoặc Organization (O) xem có đúng là công ty sở hữu dịch vụ hay không (ví dụ: GitHub, Inc.); nếu là tổ chức cá nhân hoặc tổ chức cấp phát tự do không rõ nguồn gốc, đây chắc chắn là phishing.
+
+Bước 4: Kiểm tra bằng công cụ hỗ trợ kỹ thuật (Tool-assisted Check)
+Trình giải mã Punycode: Nếu nghi ngờ một URL có chứa ký tự ẩn, hãy dán URL đó vào các công cụ chuyển đổi Punycode trực tuyến (như bộ chuyển đổi IDN của Verisign) để xem tên miền thực tế phía sau đang trỏ tới mã xn-- gì.
+
+Quét nhanh URL: Sử dụng các dịch vụ uy tín như VirusTotal để dán đường link nghi vấn vào kiểm tra trước khi cấp quyền hay điền bất kỳ chuỗi mật khẩu nào.
